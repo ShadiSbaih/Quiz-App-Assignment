@@ -121,6 +121,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Render the entire quiz
 function renderQuiz() {
+  if (isQuizCompleted) {
+    renderResults();
+    return;
+  }
+
   let html = '<div class="quiz-content fade-in">';
 
   // Add progress counter
@@ -259,7 +264,71 @@ function submitQuiz() {
     }
   }
 
-  alert("Quiz submitted! Results functionality coming next...");
+  isQuizCompleted = true;
+  renderResults();
+}
+
+// Calculate final score
+function calculateScore() {
+  let correctAnswers = 0;
+
+  quizData.forEach((question) => {
+    const userAnswer = userAnswers[question.id];
+    let isCorrect = false;
+
+    if (question.type === "multiple-choice") {
+      isCorrect = userAnswer == question.correctAnswer;
+    } else if (question.type === "true-false") {
+      isCorrect = userAnswer === question.correctAnswer.toString();
+    }
+
+    if (isCorrect) {
+      correctAnswers++;
+    }
+  });
+
+  const total = quizData.length;
+  const percentage = (correctAnswers / total) * 100;
+  const passed = correctAnswers / total >= passThreshold;
+
+  return {
+    correct: correctAnswers,
+    total: total,
+    percentage: percentage,
+    passed: passed,
+  };
+}
+
+// Render final results
+function renderResults() {
+  const { correct, total, percentage, passed } = calculateScore();
+  const passClass = passed ? "pass" : "fail";
+  const emoji = passed ? "🎉" : "😞";
+  const message = passed
+    ? `Congratulations! You passed with ${percentage.toFixed(1)}%`
+    : `You need ${
+        passThreshold * 100
+      }% to pass. You scored ${percentage.toFixed(1)}%`;
+
+  const html = `
+    <div class="results fade-in">
+      <div class="score ${passClass}">
+        ${emoji}<br>
+        ${correct} / ${total}
+      </div>
+      <div class="result-message ${passClass}">
+        <strong>${message}</strong>
+      </div>
+      <button class="btn btn-reset" onclick="startNewQuiz()">🆕 Start New Quiz</button>
+    </div>
+  `;
+
+  appContainer.innerHTML = html;
+}
+
+// Start a new quiz
+function startNewQuiz() {
+  resetQuiz();
 }
 
 // Render a single question
