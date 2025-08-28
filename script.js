@@ -111,3 +111,62 @@ let passThreshold = 0.7; // 70% to pass
 
 // Get DOM elements
 const appContainer = document.getElementById("app");
+
+// Initialize the quiz when page loads
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(() => {
+    renderQuiz();
+  }, 1000);
+});
+
+// Render the entire quiz
+function renderQuiz() {
+  let html = '<div class="quiz-content fade-in">';
+
+  // Add all questions
+  quizData.forEach((questionData) => {
+    html += renderQuestion(questionData);
+  });
+
+  html += "</div>";
+
+  appContainer.innerHTML = html;
+}
+
+// Render a single question
+function renderQuestion(questionData) {
+  let html = `
+    <div class="question-card" data-question-id="${questionData.id}">
+      <div class="question-title">
+        <span class="question-number">Question ${questionData.id}:</span> ${questionData.question}
+      </div>
+      <div class="options">
+  `;
+
+  if (questionData.type === "multiple-choice") {
+    // Render multiple choice options
+    questionData.options.forEach((option, index) => {
+      html += `
+        <label class="option" data-question-id="${questionData.id}" data-answer="${index}">
+          <input type="radio" name="question-${questionData.id}" value="${index}">
+          <span>${option}</span>
+        </label>
+      `;
+    });
+  } else if (questionData.type === "true-false") {
+    // Render true/false options
+    html += `
+      <label class="option" data-question-id="${questionData.id}" data-answer="true">
+        <input type="radio" name="question-${questionData.id}" value="true">
+        <span>True</span>
+      </label>
+      <label class="option" data-question-id="${questionData.id}" data-answer="false">
+        <input type="radio" name="question-${questionData.id}" value="false">
+        <span>False</span>
+      </label>
+    `;
+  }
+
+  html += "</div></div>";
+  return html;
+}
