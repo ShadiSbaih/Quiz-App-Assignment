@@ -131,6 +131,44 @@ function renderQuiz() {
   html += "</div>";
 
   appContainer.innerHTML = html;
+
+  // Add event listeners to all options
+  addOptionListeners();
+}
+
+// Add click listeners to all option labels
+function addOptionListeners() {
+  const options = document.querySelectorAll(".option");
+  options.forEach((option) => {
+    option.addEventListener("click", function () {
+      const questionId = this.dataset.questionId;
+      const answer = this.dataset.answer;
+      selectAnswer(questionId, answer);
+    });
+  });
+}
+
+// Handle answer selection
+function selectAnswer(questionId, answer) {
+  // Store the answer
+  userAnswers[questionId] = answer;
+
+  // Update UI - remove selected class from all options for this question
+  const questionCard = document.querySelector(
+    `[data-question-id="${questionId}"]`
+  );
+  const allOptions = questionCard.querySelectorAll(".option");
+  allOptions.forEach((opt) => opt.classList.remove("selected"));
+
+  // Add selected class to clicked option
+  const selectedOption = questionCard.querySelector(
+    `[data-answer="${answer}"]`
+  );
+  selectedOption.classList.add("selected");
+
+  // Check the radio button
+  const radio = selectedOption.querySelector('input[type="radio"]');
+  radio.checked = true;
 }
 
 // Render a single question
