@@ -115,6 +115,7 @@ const appContainer = document.getElementById("app");
 // Initialize the quiz when page loads
 document.addEventListener("DOMContentLoaded", function () {
   setTimeout(() => {
+    loadAnswersFromStorage();
     renderQuiz();
   }, 1000);
 });
@@ -200,6 +201,9 @@ function selectAnswer(questionId, answer) {
 
   // Update progress
   updateProgress();
+
+  // Save to storage
+  saveAnswersToStorage();
 }
 
 // Update progress display
@@ -247,6 +251,7 @@ function getProgress() {
 function resetQuiz() {
   userAnswers = {};
   isQuizCompleted = false;
+  clearStorage();
   renderQuiz();
 }
 
@@ -265,6 +270,7 @@ function submitQuiz() {
   }
 
   isQuizCompleted = true;
+  clearStorage(); // Clear storage after completion
   renderResults();
 }
 
@@ -331,6 +337,43 @@ function startNewQuiz() {
   resetQuiz();
 }
 
+// Local storage functions
+function saveAnswersToStorage() {
+  if (isQuizCompleted) return; // Don't save if quiz is completed
+
+  try {
+    const data = {
+      answers: userAnswers,
+      timestamp: new Date().getTime(),
+    };
+    localStorage.setItem("quiz-app-data", JSON.stringify(data));
+  } catch (e) {
+    console.warn("LocalStorage not available");
+  }
+}
+
+function loadAnswersFromStorage() {
+  try {
+    const data = localStorage.getItem("quiz-app-data");
+    if (data) {
+      const parsedData = JSON.parse(data);
+      if (parsedData.answers) {
+        userAnswers = parsedData.answers;
+      }
+    }
+  } catch (e) {
+    console.warn("LocalStorage not available");
+  }
+}
+
+function clearStorage() {
+  try {
+    localStorage.removeItem("quiz-app-data");
+  } catch (e) {
+    console.warn("LocalStorage not available");
+  }
+}
+
 // Render a single question
 function renderQuestion(questionData) {
   let html = `
@@ -344,22 +387,34 @@ function renderQuestion(questionData) {
   if (questionData.type === "multiple-choice") {
     // Render multiple choice options
     questionData.options.forEach((option, index) => {
+      const isSelected = userAnswers[questionData.id] == index;
       html += `
-        <label class="option" data-question-id="${questionData.id}" data-answer="${index}">
-          <input type="radio" name="question-${questionData.id}" value="${index}">
+        <label class="option ${isSelected ? "selected" : ""}" 
+               data-question-id="${questionData.id}" data-answer="${index}">
+          <input type="radio" name="question-${
+            questionData.id
+          }" value="${index}" 
+                 ${isSelected ? "checked" : ""}>
           <span>${option}</span>
         </label>
       `;
     });
   } else if (questionData.type === "true-false") {
     // Render true/false options
+    const isTrueSelected = userAnswers[questionData.id] === "true";
+    const isFalseSelected = userAnswers[questionData.id] === "false";
+
     html += `
-      <label class="option" data-question-id="${questionData.id}" data-answer="true">
-        <input type="radio" name="question-${questionData.id}" value="true">
+      <label class="option ${isTrueSelected ? "selected" : ""}" 
+             data-question-id="${questionData.id}" data-answer="true">
+        <input type="radio" name="question-${questionData.id}" value="true" 
+               ${isTrueSelected ? "checked" : ""}>
         <span>True</span>
       </label>
-      <label class="option" data-question-id="${questionData.id}" data-answer="false">
-        <input type="radio" name="question-${questionData.id}" value="false">
+      <label class="option ${isFalseSelected ? "selected" : ""}" 
+             data-question-id="${questionData.id}" data-answer="false">
+        <input type="radio" name="question-${questionData.id}" value="false" 
+               ${isFalseSelected ? "checked" : ""}>
         <span>False</span>
       </label>
     `;
