@@ -123,6 +123,18 @@ document.addEventListener("DOMContentLoaded", function () {
 function renderQuiz() {
   let html = '<div class="quiz-content fade-in">';
 
+  // Add progress counter
+  const progress = getProgress();
+  html += `
+    <div class="question-counter">
+      <strong>${progress.answered}</strong> of <strong>${progress.total}</strong> questions answered
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+    </div>
+  `;
+
   // Add all questions
   quizData.forEach((questionData) => {
     html += renderQuestion(questionData);
@@ -134,6 +146,9 @@ function renderQuiz() {
 
   // Add event listeners to all options
   addOptionListeners();
+
+  // Update progress bar color after rendering
+  updateCompletedBar();
 }
 
 // Add click listeners to all option labels
@@ -169,6 +184,50 @@ function selectAnswer(questionId, answer) {
   // Check the radio button
   const radio = selectedOption.querySelector('input[type="radio"]');
   radio.checked = true;
+
+  // Update progress
+  updateProgress();
+}
+
+// Update progress display
+function updateProgress() {
+  const progress = getProgress();
+  const counter = document.querySelector(".question-counter");
+  const progressFill = document.querySelector(".progress-fill");
+
+  if (counter) {
+    counter.innerHTML = `<strong>${progress.answered}</strong> of <strong>${progress.total}</strong> questions answered`;
+  }
+  if (progressFill) {
+    progressFill.style.width = `${progress.percentage}%`;
+  }
+
+  updateCompletedBar();
+}
+
+// Update progress bar color based on completion
+function updateCompletedBar() {
+  const progress = getProgress();
+  const progressFill = document.querySelector(".progress-fill");
+
+  if (progressFill) {
+    if (progress.percentage === 100) {
+      progressFill.style.background = "#28a745";
+    } else {
+      progressFill.style.background = "";
+    }
+  }
+}
+
+// Calculate progress
+function getProgress() {
+  const answered = Object.keys(userAnswers).length;
+  const total = quizData.length;
+  return {
+    answered: answered,
+    total: total,
+    percentage: (answered / total) * 100,
+  };
 }
 
 // Render a single question
