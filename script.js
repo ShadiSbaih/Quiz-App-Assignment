@@ -142,6 +142,14 @@ function renderQuiz() {
 
   html += "</div>";
 
+  // Add control buttons
+  html += `
+    <div class="controls">
+      <button class="btn btn-reset" onclick="resetQuiz()">🔄 Reset Quiz</button>
+      <button class="btn btn-submit" onclick="submitQuiz()">✅ Submit Quiz</button>
+    </div>
+  `;
+
   appContainer.innerHTML = html;
 
   // Add event listeners to all options
@@ -228,6 +236,30 @@ function getProgress() {
     total: total,
     percentage: (answered / total) * 100,
   };
+}
+
+// Reset the quiz
+function resetQuiz() {
+  userAnswers = {};
+  isQuizCompleted = false;
+  renderQuiz();
+}
+
+// Submit the quiz (placeholder)
+function submitQuiz() {
+  // Check for unanswered questions
+  const unansweredCount = quizData.length - Object.keys(userAnswers).length;
+
+  if (unansweredCount > 0) {
+    const confirmSubmit = confirm(
+      `You have ${unansweredCount} unanswered question(s). Submit anyway?`
+    );
+    if (!confirmSubmit) {
+      return;
+    }
+  }
+
+  alert("Quiz submitted! Results functionality coming next...");
 }
 
 // Render a single question
