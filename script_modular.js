@@ -134,8 +134,7 @@ class QuizApp {
 
     // Initialize UI
     const appContainer = document.getElementById("app");
-    this._quizUI = new QuizUI(this._quizManager, appContainer);
-    this._quizUI.init();
+    this._quizUI = new QuizUI(this._quizManager, appContainer).init();
 
     // Set up global functions for button clicks
     window.resetQuiz = () => this.restart();
@@ -171,5 +170,5 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(() => {
     const app = new QuizApp();
     app.init();
-  }, 1000);
+  }, 800);
 });
